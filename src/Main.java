@@ -1,14 +1,11 @@
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
-
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) {
         try (Scanner scanner = new Scanner(System.in)) {
-
             String continueOrGameOver;
             String playerName;
             int numberOfBoardsWon = 0;
@@ -27,63 +24,79 @@ public class Main {
             mapOfWinningBoards.put(playerName, numberOfBoardsWon);
 
             do {
-                int boardDimension;
+                int boardDimension = 0;
                 char activePlayer = 'X';
                 int i;
                 int j;
 
                 System.out.println("Please provide the board dimension (min 3, max 10): ");
-                boardDimension = scanner.nextInt();
-
-                    while (boardDimension < 3 || boardDimension > 10) {
-                    System.out.println("Incorrect data provided. Enter the board dimension again (min 3, max 10): ");
+                try {
                     boardDimension = scanner.nextInt();
+                } catch (InputMismatchException ex) {
+                    scanner.nextLine();
+                }
+                while (boardDimension < 3 || boardDimension > 10) {
+                    System.out.println("Incorrect data provided. Enter the board dimension again (min 3, max 10): ");
+                    try {
+                        boardDimension = scanner.nextInt();
+                    } catch (InputMismatchException ex) {
+                        scanner.nextLine();
                     }
-
+                }
                 char[][] board = new char[boardDimension][boardDimension];
 
                 completeTheBoard(board);
                 printTheBoard(board);
 
-                    while (gameResult(board, playersMap, mapOfWinningBoards) == '1') {
-                        System.out.println("Player " + activePlayer + ", give both coordinates: ");
+                while (gameResult(board, playersMap, mapOfWinningBoards) == '1') {
+                    System.out.println("Player " + activePlayer + ", give both coordinates: ");
+                    try {
                         i = scanner.nextInt();
                         j = scanner.nextInt();
-
-                        while (checkCoordinates(board, i, j)) {
-                            System.out.println("Values too big. Enter max value " + (board.length-1) + ": ");
+                    } catch (InputMismatchException ex) {
+                        i = -1;
+                        j = -1;
+                        scanner.nextLine();
+                    }
+                    while (checkCoordinates(board, i, j)) {
+                        System.out.println("Values too big. Enter max value " + (board.length-1) + ": ");
+                        try {
                             i = scanner.nextInt();
                             j = scanner.nextInt();
-                        }
-
-                        while (!updateTheBoard(board, i, j, activePlayer)) {
-                            System.out.println("Field occupied. Enter other coordinates: ");
-                            i = scanner.nextInt();
-                            j = scanner.nextInt();
-                        }
-
-                        printTheBoard(board);
-
-                        if (activePlayer == 'X') {
-                            activePlayer = '0';
-                        } else {
-                            activePlayer = 'X';
+                        } catch (InputMismatchException ex) {
+                            scanner.nextLine();
                         }
                     }
+                    while (!updateTheBoard(board, i, j, activePlayer)) {
+                        System.out.println("Field occupied. Enter other coordinates: ");
+                        try {
+                            i = scanner.nextInt();
+                            j = scanner.nextInt();
+                        } catch (InputMismatchException ex) {
+                            scanner.nextLine();
+                        }
+                    }
+                    printTheBoard(board);
+
+                    if (activePlayer == 'X') {
+                        activePlayer = '0';
+                    } else {
+                        activePlayer = 'X';
+                    }
+                }
                 System.out.println("Shall we play again? Enter YES or NO.");
                 scanner.nextLine();
                 continueOrGameOver = scanner.nextLine();
             }
             while (continueOrGameOver.equalsIgnoreCase("YES"));
-                System.out.println("Results:\n" +
-                                   playersMap.get('X') + " : " + mapOfWinningBoards.get(playersMap.get('X')) + " board won\n" +
-                                   playersMap.get('0') + " : " + mapOfWinningBoards.get(playersMap.get('0')) + " board won\n");
-                System.out.println("Thank you for the game!");
+            System.out.println("Results:\n" +
+                    playersMap.get('X') + " : " + mapOfWinningBoards.get(playersMap.get('X')) + " board won\n" +
+                    playersMap.get('0') + " : " + mapOfWinningBoards.get(playersMap.get('0')) + " board won\n");
+            System.out.println("Thank you for the game!");
         }
     }
 
     private static void completeTheBoard(char[][] board) {
-
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 board[i][j] = '-';
@@ -92,15 +105,13 @@ public class Main {
     }
 
     private static void printTheBoard(char[][] board) {
-
         int dim = board.length;
-        System.out.print("\t");
 
+        System.out.print("\t");
         for (int i = 0; i < dim; i++) {
             System.out.print(i + "\t");
         }
         System.out.println();
-
         for (int row = 0; row < dim; row++) {
             System.out.print(row + "\t");
             for (int col = 0; col < dim; col++) {
@@ -111,7 +122,6 @@ public class Main {
     }
 
     private static boolean checkCoordinates(char[][] board, int i, int j) {
-
         if (i >= board.length || j >= board.length) {
             return true;
         } else {
@@ -123,7 +133,6 @@ public class Main {
                                           int i,
                                           int j,
                                           char activePlayer) {
-
         if (board[i][j] == '-') {
             board[i][j] = activePlayer;
             return true;
@@ -133,7 +142,6 @@ public class Main {
     }
 
     private static char checkRows(char[][] board) {
-
         char row = ' ';
 
         for (int i = 0; i < board.length; i++) {
@@ -149,7 +157,6 @@ public class Main {
     }
 
     private static char checkColumns(char[][] board) {
-
         char col = ' ';
 
         for (int i = 0; i < board.length; i++) {
@@ -168,23 +175,21 @@ public class Main {
                                    int i,
                                    char oneCharacterInLine,
                                    char type) {
-
-                for (int j = 1; j < board[i].length; j++) {
-                    if (type == 'c') {
-                        if (board[j][i] != oneCharacterInLine) {
-                            oneCharacterInLine = ' ';
-                        }
-                    } else {
-                        if (board[i][j] != oneCharacterInLine) {
-                            oneCharacterInLine = ' ';
-                        }
-                    }
+        for (int j = 1; j < board[i].length; j++) {
+            if (type == 'c') {
+                if (board[j][i] != oneCharacterInLine) {
+                    oneCharacterInLine = ' ';
                 }
-                return oneCharacterInLine;
+            } else {
+                if (board[i][j] != oneCharacterInLine) {
+                    oneCharacterInLine = ' ';
+                }
+            }
+        }
+        return oneCharacterInLine;
     }
 
     private static char checkDiagonals(char[][] board) {
-
         int w = 0;
         int x = 0;
         int y = 0;
@@ -196,13 +201,12 @@ public class Main {
             } else if (board[i][i] == '0') {
                 x++;
             }
-            if (board[i][board.length-i-1] == 'X') {
+            if (board[i][board.length - i - 1] == 'X') {
                 y++;
-            } else if (board[i][board.length-i-1] == '0') {
+            } else if (board[i][board.length - i - 1] == '0') {
                 z++;
             }
         }
-
         if (w == board.length || y == board.length) {
             return 'X';
         } else if (x == board.length || z == board.length) {
@@ -215,7 +219,6 @@ public class Main {
     private static char gameResult(char[][] board,
                                    Map<Character, String> playersMap,
                                    Map<String, Integer> mapOfWinningBoards) {
-
         char result;
 
         result = checkColumns(board);
@@ -223,28 +226,25 @@ public class Main {
         if (result != ' ') {
             System.out.println("The winner is the player: " + result + ". Congratulations!");
             mapOfWinningBoards.replace(playersMap.get(result),
-                                       mapOfWinningBoards.get(playersMap.get(result))+1);
+                    mapOfWinningBoards.get(playersMap.get(result)) + 1);
             return result;
         }
-
         result = checkRows(board);
 
         if (result != ' ') {
             System.out.println("The winner is the player: " + result + ". Congratulations!");
             mapOfWinningBoards.replace(playersMap.get(result),
-                                       mapOfWinningBoards.get(playersMap.get(result))+1);
+                    mapOfWinningBoards.get(playersMap.get(result)) + 1);
             return result;
         }
-
         result = checkDiagonals(board);
 
         if (result != ' ') {
             System.out.println("The winner is the player: " + result + ". Congratulations!");
             mapOfWinningBoards.replace(playersMap.get(result),
-                                       mapOfWinningBoards.get(playersMap.get(result))+1);
+                    mapOfWinningBoards.get(playersMap.get(result)) + 1);
             return result;
         }
-
         for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if (board[i][j] == '-') {
@@ -252,11 +252,9 @@ public class Main {
                 }
             }
         }
-
         if (result != ' ') {
             return result;
-        }
-        else {
+        } else {
             System.out.println("Draw!");
             return 'd';
         }
